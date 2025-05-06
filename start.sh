@@ -8,9 +8,26 @@ NOTEBOOK_DIR_TO_USE="${NOTEBOOK_DIR:-/workspace}" # Default to /workspace for Ju
 
 JUPYTER_CMD_ARGS="--ip=0.0.0.0 --port=${JUPYTER_EFFECTIVE_PORT} --no-browser --allow-root --notebook-dir=${NOTEBOOK_DIR_TO_USE}"
 
+# Explicitly define the Conda Python path
+CONDA_PYTHON_EXEC="/opt/conda/bin/python3"
+
 if [ -n "$JUPYTER_PASSWORD" ]; then
-    # Ensure python3 and notebook package are available
-    HASHED_PASSWORD=$(python3 -c "from notebook.auth import passwd; print(passwd('$JUPYTER_PASSWORD', 'sha256'))")
+    echo "Jupyter password is set. Hashing password..."
+    # Ensure python3 and notebook package are available via Conda Python
+    if ! $CONDA_PYTHON_EXEC -c "import sys; sys.exit(0) if sys.version_info >= (3,0) else sys.exit(1)"; then
+        echo "Error: Conda Python 3 at $CONDA_PYTHON_EXEC not found or not working." >&2
+        exit 1
+    fi
+    if ! $CONDA_PYTHON_EXEC -c "import notebook.auth" &> /dev/null; then
+        echo "Error: 'notebook.auth' module not found by Conda Python at $CONDA_PYTHON_EXEC." >&2
+        echo "This might indicate an issue with the 'notebook' package installation." >&2
+        # Attempt to list site-packages for debugging
+        echo "Conda site-packages contents (first level):"
+        $CONDA_PYTHON_EXEC -c "import site; import os; print(os.listdir(site.getsitepackages()[0]))" || echo "Could not list site-packages."
+        exit 1
+    fi
+
+    HASHED_PASSWORD=$($CONDA_PYTHON_EXEC -c "from notebook.auth import passwd; print(passwd('$JUPYTER_PASSWORD', 'sha256'))")
     JUPYTER_CMD_ARGS="$JUPYTER_CMD_ARGS --NotebookApp.password='$HASHED_PASSWORD'"
     echo "Jupyter Notebook configured with a password. Access on port ${JUPYTER_EFFECTIVE_PORT}."
 else
@@ -35,7 +52,7 @@ sleep 5 # Give Jupyter a moment to start and print its initial logs
 echo "Preparing to start ComfyUI..."
 echo "Current environment CLI_ARGS: '$CLI_ARGS'"
 
-COMFYUI_EXEC_CMD="python3 /app/main.py"
+COMFYUI_EXEC_CMD="/opt/conda/bin/python3 /app/main.py" # Use Conda python for ComfyUI too for consistency
 COMFYUI_FINAL_ARGS=""
 
 # Check if CLI_ARGS already contains --listen or --port
@@ -71,7 +88,3 @@ echo "Starting ComfyUI with command: $COMFYUI_EXEC_CMD $COMFYUI_FINAL_ARGS"
 # `exec` replaces the shell process with the ComfyUI process.
 # This makes ComfyUI the main foreground process.
 exec $COMFYUI_EXEC_CMD $COMFYUI_FINAL_ARGS
-
-# If ComfyUI exits, the script (and thus container) will stop.
-# Fallback to keep container alive if exec fails (should not happen with set -e)
-# wait $JUPYTER_PID # Usually not needed if ComfyUI is the main process
