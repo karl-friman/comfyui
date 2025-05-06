@@ -60,7 +60,7 @@ RUN echo "Verifying notebook.auth in environment: $CONDA_ENV_NAME" && \
     python -c "import notebook.auth; print('>>> notebook.auth successfully imported in new environment <<<')"
 
 # Stage 3: Final image
-FROM base AS final # Start from 'base' which has conda but not the activated env by default
+FROM base AS final
 
 ENV CONDA_ENV_NAME=comfy # Define for PATH construction
 # Set PATH to include the created Conda environment's bin directory
