@@ -67,7 +67,7 @@ COPY --from=builder /opt/conda /opt/conda
 COPY --from=builder /opt/ComfyUI /opt/ComfyUI
 
 # Environment variables for Jupyter configuration (can be overridden at runtime)
-ENV JUPYTER_PASSWORD="" # Set this securely at runtime!
+ENV JUPYTER_PASSWORD=""
 ENV NOTEBOOK_DIR="/workspace"
 ENV JUPYTER_PORT="8888"
 ENV COMFYUI_PORT="8188"
