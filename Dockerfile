@@ -7,19 +7,19 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Jupyter Notebook and jupyter_server_proxy using Conda
-# The base image should have conda in /opt/conda/bin/conda
-# We also ensure pip is up-to-date within conda for any pip installs it might do.
-RUN echo "Attempting to install notebook and jupyter_server_proxy using Conda..." && \
+# Install Jupyter Notebook using Conda
+# Then, if jupyter_server_proxy is still desired and not pulled in by notebook, try pip for it.
+RUN echo "Attempting to install notebook using Conda..." && \
     /opt/conda/bin/conda install -y -c conda-forge \
         notebook \
-        jupyter_server_proxy \
-    && echo "Conda install finished. Upgrading pip within conda..." && \
+    && echo "Conda install of notebook finished. Upgrading pip within conda..." && \
     /opt/conda/bin/python -m pip install --no-cache-dir --upgrade pip \
-    && echo "Pip upgrade finished. Cleaning conda..." && \
+    && echo "Pip upgrade finished. Attempting to install jupyter-server-proxy using pip..." && \
+    /opt/conda/bin/python -m pip install --no-cache-dir jupyter-server-proxy \
+    && echo "Installation of jupyter-server-proxy via pip finished. Cleaning conda..." && \
     /opt/conda/bin/conda clean -tipsy \
     && echo "Conda clean finished. Verifying notebook.auth directly..." \
-    && /opt/conda/bin/python3 -c "import notebook.auth; print('>>> notebook.auth successfully imported after conda install in Dockerfile <<<')" \
+    && /opt/conda/bin/python3 -c "import notebook.auth; print('>>> notebook.auth successfully imported after conda/pip install in Dockerfile <<<')" \
     && echo "Notebook package verification successful."
 
 # Environment variables for Jupyter configuration
