@@ -76,7 +76,7 @@ ENV JUPYTER_PASSWORD=""
 # Jupyter's working directory for notebooks
 ENV NOTEBOOK_DIR="/workspace"
 ENV JUPYTER_PORT="8888"
-ENV COMFYUI_PORT="8188" # For ComfyUI
+ENV COMFYUI_PORT="8188"
 
 # Expose ports
 EXPOSE ${JUPYTER_PORT} ${COMFYUI_PORT}
