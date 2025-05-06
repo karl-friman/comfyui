@@ -12,11 +12,15 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Keep everything else commented out for now
-# ENV JUPYTER_PASSWORD=""
-# ENV NOTEBOOK_DIR="/workspace"
-# ENV JUPYTER_PORT="8888"
-# EXPOSE ${JUPYTER_PORT}
+# Environment variables for Jupyter configuration
+ENV JUPYTER_PASSWORD=""
+ENV NOTEBOOK_DIR="/workspace" # Jupyter's working directory for notebooks
+ENV JUPYTER_PORT="8888"
+
+# Expose Jupyter's port. ComfyUI's 8188 is already exposed by the base image.
+EXPOSE ${JUPYTER_PORT}
+
+# Keep the rest commented out for now
 # COPY start.sh /usr/local/bin/start.sh
 # RUN chmod +x /usr/local/bin/start.sh
 # CMD ["/usr/local/bin/start.sh"]
