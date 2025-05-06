@@ -14,13 +14,21 @@ RUN apt-get update && \
 
 # Environment variables for Jupyter configuration
 ENV JUPYTER_PASSWORD=""
-ENV NOTEBOOK_DIR="/workspace" # Jupyter's working directory for notebooks
+# Jupyter's working directory for notebooks
+ENV NOTEBOOK_DIR="/workspace"
 ENV JUPYTER_PORT="8888"
 
 # Expose Jupyter's port. ComfyUI's 8188 is already exposed by the base image.
 EXPOSE ${JUPYTER_PORT}
 
-# Keep the rest commented out for now
-# COPY start.sh /usr/local/bin/start.sh
-# RUN chmod +x /usr/local/bin/start.sh
-# CMD ["/usr/local/bin/start.sh"]
+# The base image's WORKDIR is /app. ComfyUI will run from there.
+# Jupyter will use NOTEBOOK_DIR.
+
+# Copy the startup script and make it executable
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+# Override the CMD from the base image to use our script.
+# The base image's ENTRYPOINT (/scripts/docker-entrypoint.sh) will run first,
+# and then it will execute this new CMD.
+CMD ["/usr/local/bin/start.sh"]
