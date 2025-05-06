@@ -1,11 +1,22 @@
 FROM zhangp365/comfyui:latest
 
-# Test 1: Just a simple RUN command
-RUN echo "Test"
+# Install Jupyter Notebook, pip, procps (for ps command), and other utilities
+# Using apt-get from the base image which is Ubuntu-based.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        procps \
+        python3-pip \
+    && pip install --no-cache-dir \
+        notebook \
+        jupyter_server_proxy \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Test 2: Copy the script (if Test 1 passes)
+# Keep everything else commented out for now
+# ENV JUPYTER_PASSWORD=""
+# ENV NOTEBOOK_DIR="/workspace"
+# ENV JUPYTER_PORT="8888"
+# EXPOSE ${JUPYTER_PORT}
 # COPY start.sh /usr/local/bin/start.sh
 # RUN chmod +x /usr/local/bin/start.sh
-
-# Test 3: Set the CMD (if Test 2 passes)
 # CMD ["/usr/local/bin/start.sh"]
