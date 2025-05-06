@@ -24,7 +24,7 @@ ENV PATH=$CONDA_DIR/bin:$PATH
 # Create a Conda environment
 ENV CONDA_ENV_NAME=comfy
 RUN conda create -y -n $CONDA_ENV_NAME python=3.10 && \
-    conda clean -tipsy
+    conda clean -a -y # CORRECTED ARGUMENTS FOR CONDA CLEAN
 
 # Activate Conda environment for subsequent RUN commands
 SHELL ["conda", "run", "-n", "$CONDA_ENV_NAME", "/bin/bash", "-c"]
@@ -67,7 +67,7 @@ ENV JUPYTER_PASSWORD=""
 # Jupyter's working directory for notebooks
 ENV NOTEBOOK_DIR="/workspace"
 ENV JUPYTER_PORT="8888"
-ENV COMFYUI_PORT="8188"
+ENV COMFYUI_PORT="8188" # For ComfyUI
 
 # Expose ports
 EXPOSE ${JUPYTER_PORT} ${COMFYUI_PORT}
